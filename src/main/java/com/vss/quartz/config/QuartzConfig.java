@@ -1,9 +1,6 @@
 package com.vss.quartz.config;
 
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
+import org.quartz.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,6 +25,30 @@ public class QuartzConfig {
                 .withSchedule(org.quartz.SimpleScheduleBuilder.simpleSchedule()
                         .withIntervalInSeconds(10)
                         .repeatForever())
+                .build();
+    }
+
+    @Bean
+    public JobDetail emailJobDetail(){
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("email","kienkj888@gmail.com");
+        jobDataMap.put("subject","Test Email from Quartz Job");
+
+        return JobBuilder.newJob()
+                .withIdentity("emailJob","group2")
+                .ofType(com.vss.quartz.job.EmailJob.class)
+                .usingJobData(jobDataMap) // Truyền dữ liệu vào Job
+                .storeDurably()
+                .build();
+    }
+    String cronEmail = "0 34 11 * * ?";
+    @Bean
+    public Trigger emailJobTrigger() {
+        return TriggerBuilder.newTrigger()
+                .forJob(emailJobDetail())
+                .withIdentity("emailTrigger", "group2")
+                .startNow()
+                .withSchedule(CronScheduleBuilder.cronSchedule(cronEmail))
                 .build();
     }
 }
