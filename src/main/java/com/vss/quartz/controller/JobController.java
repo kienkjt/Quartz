@@ -15,6 +15,7 @@ public class JobController {
     public JobController(JobSchedulerService jobSchedulerService) {
         this.jobSchedulerService = jobSchedulerService;
     }
+
     // Tạo job mới
     @PostMapping
     public String createJob(@RequestBody JobRequest jobRequest) throws SchedulerException {
@@ -30,6 +31,7 @@ public class JobController {
         jobSchedulerService.pauseJob(jobName);
         return "Job paused successfully";
     }
+
     // Tiếp tục job đã tạm dừng
     @PutMapping("/{jobName}/resume")
     public String resumeJob(@PathVariable String jobName) throws SchedulerException {

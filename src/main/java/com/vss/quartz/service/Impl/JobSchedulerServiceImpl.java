@@ -52,7 +52,7 @@ public class JobSchedulerServiceImpl implements JobSchedulerService {
     @Override
     public Trigger buildJobTrigger(JobRequest jobRequest) {
         return TriggerBuilder.newTrigger()
-                .forJob(buildJobDetail(jobRequest))
+                .forJob(JobKey.jobKey(jobRequest.getJobName()))
                 .withIdentity(jobRequest.getJobName() + "Trigger")
                 .withSchedule(CronScheduleBuilder.cronSchedule(jobRequest.getCron()))
                 .build();

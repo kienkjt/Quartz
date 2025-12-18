@@ -14,6 +14,7 @@ public interface JobSchedulerService {
 
     void deleteJob(String jobname) throws SchedulerException;
 
-    public JobDetail buildJobDetail(JobRequest jobRequest) ;
-    public Trigger buildJobTrigger(JobRequest jobRequest) ;
+    JobDetail buildJobDetail(JobRequest jobRequest) ;
+
+    Trigger buildJobTrigger(JobRequest jobRequest) ;
 }
