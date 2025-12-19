@@ -1,6 +1,8 @@
 package com.vss.quartz.service.Impl;
 
+import com.vss.quartz.dto.EmailJobRequest;
 import com.vss.quartz.dto.JobRequest;
+import com.vss.quartz.job.EmailJob;
 import com.vss.quartz.job.HelloJob;
 import com.vss.quartz.service.JobSchedulerService;
 import org.quartz.*;
@@ -47,6 +49,33 @@ public class JobSchedulerServiceImpl implements JobSchedulerService {
                 .usingJobData(jobDataMap)
                 .storeDurably()
                 .build();
+    }
+    @Override
+    public void scheduleEmailJob(EmailJobRequest request) throws SchedulerException {
+
+        JobKey jobKey = JobKey.jobKey(request.getJobName());
+
+        if (scheduler.checkExists(jobKey)) {
+            scheduler.deleteJob(jobKey);
+        }
+
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("to", request.getTo());
+        jobDataMap.put("subject", request.getSubject());
+        jobDataMap.put("body", request.getBody());
+
+        JobDetail jobDetail = JobBuilder.newJob(EmailJob.class)
+                .withIdentity(jobKey)
+                .usingJobData(jobDataMap)
+                .build();
+
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .withIdentity(request.getJobName() + "Trigger")
+                .forJob(jobDetail)
+                .withSchedule(CronScheduleBuilder.cronSchedule(request.getCron()))
+                .build();
+
+        scheduler.scheduleJob(jobDetail, trigger);
     }
 
     @Override

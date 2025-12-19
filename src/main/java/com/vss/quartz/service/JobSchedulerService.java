@@ -1,5 +1,6 @@
 package com.vss.quartz.service;
 
+import com.vss.quartz.dto.EmailJobRequest;
 import com.vss.quartz.dto.JobRequest;
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
@@ -15,6 +16,8 @@ public interface JobSchedulerService {
     void deleteJob(String jobname) throws SchedulerException;
 
     JobDetail buildJobDetail(JobRequest jobRequest) ;
+
+    void scheduleEmailJob(EmailJobRequest request) throws SchedulerException;
 
     Trigger buildJobTrigger(JobRequest jobRequest) ;
 }
