@@ -23,18 +23,18 @@ public class JobSchedulerServiceImpl implements JobSchedulerService {
     }
 
     @Override
-    public void pauseJob(String jobname) throws SchedulerException {
-        scheduler.pauseJob(new JobKey(jobname));
+    public void pauseJob(String jobname, String jobGroup) throws SchedulerException {
+        scheduler.pauseJob(new JobKey(jobname, jobGroup));
     }
 
     @Override
-    public void resumeJob(String jobname) throws SchedulerException {
-        scheduler.resumeJob(new JobKey(jobname));
+    public void resumeJob(String jobname, String jobGroup) throws SchedulerException {
+        scheduler.resumeJob(new JobKey(jobname, jobGroup));
     }
 
     @Override
-    public void deleteJob(String jobname) throws SchedulerException {
-        scheduler.deleteJob(new JobKey(jobname));
+    public void deleteJob(String jobname, String jobGroup) throws SchedulerException {
+        scheduler.deleteJob(new JobKey(jobname,jobGroup));
     }
 
     @Override
@@ -45,7 +45,7 @@ public class JobSchedulerServiceImpl implements JobSchedulerService {
         jobDataMap.put("metadata", jobRequest.getMetadata());
         return JobBuilder.newJob()
                 .ofType(HelloJob.class)
-                .withIdentity(jobRequest.getJobName())
+                .withIdentity(jobRequest.getJobName(), jobRequest.getJobGroup())
                 .usingJobData(jobDataMap)
                 .storeDurably()
                 .build();
@@ -81,8 +81,8 @@ public class JobSchedulerServiceImpl implements JobSchedulerService {
     @Override
     public Trigger buildJobTrigger(JobRequest jobRequest) {
         return TriggerBuilder.newTrigger()
-                .forJob(JobKey.jobKey(jobRequest.getJobName()))
-                .withIdentity(jobRequest.getJobName() + "Trigger")
+                .forJob(JobKey.jobKey(jobRequest.getJobName(), jobRequest.getJobGroup()))
+                .withIdentity(jobRequest.getJobName(), jobRequest.getJobGroup())
                 .withSchedule(CronScheduleBuilder.cronSchedule(jobRequest.getCron()))
                 .build();
     }

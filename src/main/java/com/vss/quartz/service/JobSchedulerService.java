@@ -9,11 +9,11 @@ import org.quartz.Trigger;
 public interface JobSchedulerService {
     void scheduleJob(JobDetail jobdetail , Trigger trigger) throws SchedulerException;
 
-    void pauseJob(String jobname) throws SchedulerException;
+    void pauseJob(String jobname, String jobGroup) throws SchedulerException;
 
-    void resumeJob(String jobname) throws SchedulerException;
+    void resumeJob(String jobname, String jobGroup) throws SchedulerException;
 
-    void deleteJob(String jobname) throws SchedulerException;
+    void deleteJob(String jobname, String jobGroup) throws SchedulerException;
 
     JobDetail buildJobDetail(JobRequest jobRequest) ;
 

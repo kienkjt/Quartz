@@ -26,23 +26,23 @@ public class JobController {
     }
 
     // Tạm dừng một job
-    @PutMapping("/{jobName}/pause")
-    public String pauseJob(@PathVariable String jobName) throws SchedulerException {
-        jobSchedulerService.pauseJob(jobName);
+    @PutMapping("/{jobGroup}/{jobName}/pause")
+    public String pauseJob(@PathVariable String jobName, @PathVariable String jobGroup) throws SchedulerException {
+        jobSchedulerService.pauseJob(jobName, jobGroup);
         return "Job paused successfully";
     }
 
     // Tiếp tục job đã tạm dừng
-    @PutMapping("/{jobName}/resume")
-    public String resumeJob(@PathVariable String jobName) throws SchedulerException {
-        jobSchedulerService.resumeJob(jobName);
+    @PutMapping("/{jobGroup}/{jobName}/resume")
+    public String resumeJob(@PathVariable String jobName, @PathVariable String jobGroup) throws SchedulerException {
+        jobSchedulerService.resumeJob(jobName, jobGroup);
         return "Job resumed successfully";
     }
 
     // Xóa một job
-    @DeleteMapping("/{jobName}")
-    public String deleteJob(@PathVariable String jobName) throws SchedulerException {
-        jobSchedulerService.deleteJob(jobName);
+    @DeleteMapping("/{jobGroup}/{jobName}")
+    public String deleteJob(@PathVariable String jobName, @PathVariable String jobGroup) throws SchedulerException {
+        jobSchedulerService.deleteJob(jobName, jobGroup);
         return "Job deleted successfully";
     }
 }
