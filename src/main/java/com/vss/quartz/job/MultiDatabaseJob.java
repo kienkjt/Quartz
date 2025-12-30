@@ -1,6 +1,7 @@
 package com.vss.quartz.job;
 
 import org.quartz.Job;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -13,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.time.LocalDateTime;
 
 @Component
@@ -32,16 +32,17 @@ public class MultiDatabaseJob implements Job {
     @Override
     @Transactional
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        logger.info("========================================");
-        logger.info("MultiDatabaseJob started at: {}", LocalDateTime.now());
-        logger.info("Job Key: {}", context.getJobDetail().getKey());
-        logger.info("========================================");
+        JobDataMap dataMap = context.getMergedJobDataMap();
+
+        String message = dataMap.getString("message");
+
+        logger.info("Message: {}", message);
+
+        dataMap.forEach((k, v) -> logger.info("Meta {} = {}", k, v));
 
         try {
-            // Execute operations on DB1
             executeOnDB1();
 
-            // Execute operations on DB2
             executeOnDB2();
 
             logger.info("Successfully completed distributed transaction across DB1 and DB2");
@@ -70,7 +71,6 @@ public class MultiDatabaseJob implements Job {
                 stmt.execute();
             }
 
-            // Insert log entry
             String insert = "INSERT INTO job_log_db1 (job_name, message) VALUES (?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(insert)) {
                 stmt.setString(1, "MultiDatabaseJob");
@@ -79,14 +79,6 @@ public class MultiDatabaseJob implements Job {
                 logger.info("Inserted {} rows into business_db1", rows);
             }
 
-            // Query to verify
-            String query = "SELECT COUNT(*) FROM job_log_db1";
-            try (PreparedStatement stmt = conn.prepareStatement(query);
-                 ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    logger.info("Total records in business_db1: {}", rs.getInt(1));
-                }
-            }
         }
     }
 
@@ -94,7 +86,6 @@ public class MultiDatabaseJob implements Job {
         logger.info("Executing on business_db2...");
 
         try (Connection conn = db2DataSource.getConnection()) {
-            // Create table if not exists
             String createTable = "CREATE TABLE IF NOT EXISTS job_log_db2 (" +
                     "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
                     "job_name VARCHAR(255), " +
@@ -106,7 +97,6 @@ public class MultiDatabaseJob implements Job {
                 stmt.execute();
             }
 
-            // Insert log entry
             String insert = "INSERT INTO job_log_db2 (job_name, message) VALUES (?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(insert)) {
                 stmt.setString(1, "MultiDatabaseJob");
@@ -115,14 +105,6 @@ public class MultiDatabaseJob implements Job {
                 logger.info("Inserted {} rows into business_db2", rows);
             }
 
-            // Query to verify
-            String query = "SELECT COUNT(*) FROM job_log_db2";
-            try (PreparedStatement stmt = conn.prepareStatement(query);
-                 ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    logger.info("Total records in business_db2: {}", rs.getInt(1));
-                }
-            }
         }
     }
 }

@@ -16,10 +16,10 @@ public class SimpleJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        logger.info("========================================");
+        logger.info("");
         logger.info("SimpleJob executed at: {}", LocalDateTime.now());
         logger.info("Job Key: {}", context.getJobDetail().getKey());
         logger.info("Job Data: {}", context.getJobDetail().getJobDataMap());
-        logger.info("========================================");
+        logger.info("");
     }
 }

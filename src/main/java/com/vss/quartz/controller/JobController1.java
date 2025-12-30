@@ -1,6 +1,8 @@
 package com.vss.quartz.controller;
 
+import com.vss.quartz.dto.JobRequest;
 import com.vss.quartz.service.JobSchedulerService1;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,60 +17,12 @@ public class JobController1 {
     @Autowired
     private JobSchedulerService1 jobSchedulerService;
 
-    @GetMapping("/simple/trigger")
-    public ResponseEntity<Map<String, String>> triggerSimpleJob() {
-        Map<String, String> response = new HashMap<>();
-        try {
-            jobSchedulerService.triggerJobNow("simpleJob", "group1");
-            response.put("status", "success");
-            response.put("message", "SimpleJob triggered successfully");
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.internalServerError().body(response);
-        }
-    }
-
-    @GetMapping("/multi-db/trigger")
-    public ResponseEntity<Map<String, String>> triggerMultiDatabaseJob() {
-        Map<String, String> response = new HashMap<>();
-        try {
-            jobSchedulerService.triggerJobNow("multiDatabaseJob", "group1");
-            response.put("status", "success");
-            response.put("message", "MultiDatabaseJob triggered successfully");
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.internalServerError().body(response);
-        }
-    }
-
     @PostMapping("/cron")
-    public ResponseEntity<Map<String, String>> scheduleCronJob(
-            @RequestBody Map<String, String> request) {
-        Map<String, String> response = new HashMap<>();
-        try {
-            String jobName = request.get("jobName");
-            String cronExpression = request.get("cronExpression");
-
-            if (jobName == null || cronExpression == null) {
-                response.put("status", "error");
-                response.put("message", "jobName and cronExpression are required");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            jobSchedulerService.scheduleCronJob(jobName, cronExpression);
-            response.put("status", "success");
-            response.put("message", "Job scheduled with cron: " + cronExpression);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            return ResponseEntity.internalServerError().body(response);
-        }
+    public ResponseEntity<?> scheduleCronJob(@RequestBody JobRequest request) throws SchedulerException {
+        jobSchedulerService.scheduleCronJob(request);
+        return ResponseEntity.ok("Job scheduled successfully");
     }
+
 
     @PostMapping("/{group}/{name}/pause")
     public ResponseEntity<Map<String, String>> pauseJob(

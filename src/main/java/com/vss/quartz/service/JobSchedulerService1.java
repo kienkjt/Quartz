@@ -1,5 +1,6 @@
 package com.vss.quartz.service;
 
+import com.vss.quartz.dto.JobRequest;
 import com.vss.quartz.job.MultiDatabaseJob;
 import com.vss.quartz.job.SimpleJob;
 import org.quartz.*;
@@ -88,27 +89,38 @@ public class JobSchedulerService1 {
     }
 
     // lên lịch một công việc với biểu thức cron
-    public void scheduleCronJob(String jobName, String cronExpression) throws SchedulerException {
+    public void scheduleCronJob(JobRequest request) throws SchedulerException {
+
+        JobKey jobKey = JobKey.jobKey(request.getJobName(), request.getJobGroup());
+
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("message", request.getMessage());
+
+        if (request.getMetadata() != null) {
+            jobDataMap.putAll(request.getMetadata());
+        }
+
         JobDetail jobDetail = JobBuilder.newJob(MultiDatabaseJob.class)
-                .withIdentity(jobName, "cronGroup")
-                .withDescription("Job scheduled with cron expression: " + cronExpression)
-                .storeDurably()
+                .withIdentity(jobKey)
+                .usingJobData(jobDataMap)
                 .build();
 
-        Trigger trigger = TriggerBuilder.newTrigger()
-                .withIdentity(jobName + "Trigger", "cronGroup")
-                .startNow()
-                .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression))
+        TriggerKey triggerKey =
+                TriggerKey.triggerKey(request.getJobName() + "Trigger", request.getJobGroup());
+
+        CronTrigger trigger = TriggerBuilder.newTrigger()
+                .withIdentity(triggerKey)
+                .forJob(jobDetail)
+                .withSchedule(CronScheduleBuilder.cronSchedule(request.getCron()))
                 .build();
 
-        if (scheduler.checkExists(jobDetail.getKey())) {
-            logger.info("Job {} already exists, rescheduling...", jobName);
-            scheduler.rescheduleJob(trigger.getKey(), trigger);
+        if (scheduler.checkExists(jobKey)) {
+            scheduler.rescheduleJob(triggerKey, trigger);
         } else {
-            Date scheduledDate = scheduler.scheduleJob(jobDetail, trigger);
-            logger.info("Job {} scheduled with cron: {} at: {}", jobName, cronExpression, scheduledDate);
+            scheduler.scheduleJob(jobDetail, trigger);
         }
     }
+
 
 
     public void triggerJobNow(String jobName, String groupName) throws SchedulerException {

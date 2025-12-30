@@ -16,6 +16,7 @@ public class DataSourceConfig {
 
     // QUARTZ XA DATASOURCE
     @Bean(name = "quartzXADataSource")
+    @Primary
     @ConfigurationProperties(prefix = "app.datasource.quartz-xa")
     public AtomikosDataSourceBean quartzXADataSource() {
         AtomikosDataSourceBean ds = new AtomikosDataSourceBean();
@@ -52,7 +53,6 @@ public class DataSourceConfig {
 
     // BUSINESS DB1 - XA DATASOURCE
     @Bean(name = "db1DataSource")
-    @Primary
     @ConfigurationProperties(prefix = "app.datasource.db1")
     public AtomikosDataSourceBean db1DataSource() {
         AtomikosDataSourceBean ds = new AtomikosDataSourceBean();
