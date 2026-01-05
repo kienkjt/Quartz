@@ -33,18 +33,24 @@ public class QuartzConfig {
 
         SchedulerFactoryBean factory = new SchedulerFactoryBean();
         factory.setJobFactory(jobFactory);
+
+        // XA + NON-XA
         factory.setDataSource(quartzXA);
         factory.setNonTransactionalDataSource(quartzNonXA);
-        factory.setQuartzProperties(quartzProperties());
+
+        // QUARTZ PROPERTIES (ONLY org.quartz.*)
+        PropertiesFactoryBean props = new PropertiesFactoryBean();
+        props.setLocation(new ClassPathResource("quartz.properties"));
+        props.afterPropertiesSet();
+
+        factory.setQuartzProperties(props.getObject());
+
+        // VERY IMPORTANT
+        factory.setOverwriteExistingJobs(true);
+        factory.setAutoStartup(true);
+
         return factory;
     }
-
-    @Bean
-    public Properties quartzProperties() throws IOException {
-        PropertiesFactoryBean factoryBean = new PropertiesFactoryBean();
-        factoryBean.setLocation(new ClassPathResource("/application.properties"));
-        factoryBean.afterPropertiesSet();
-        return factoryBean.getObject();
-    }
 }
+
 
