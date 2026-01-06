@@ -26,8 +26,6 @@ public class JobSchedulerService1 {
         try {
             logger.info("Scheduling jobs on application startup...");
 
-            scheduleSimpleJob();
-
             scheduleMultiDatabaseJob();
 
             logger.info("All jobs scheduled successfully");
@@ -35,32 +33,6 @@ public class JobSchedulerService1 {
         } catch (Exception e) {
             logger.error("Error scheduling jobs", e);
         }
-    }
-
-    // Lên lịch một công việc đơn giản chạy mỗi 30 giây
-    public void scheduleSimpleJob() throws SchedulerException {
-        JobDetail jobDetail = JobBuilder.newJob(SimpleJob.class)
-                .withIdentity("simpleJob", "group1")
-                .withDescription("Simple test job")
-                .usingJobData("author", "system")
-                .storeDurably()
-                .build();
-
-        Trigger trigger = TriggerBuilder.newTrigger()
-                .withIdentity("simpleTrigger", "group1")
-                .startNow()
-                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInSeconds(30)
-                        .repeatForever())
-                .build();
-        // Kiêm tra nếu công việc đã tồn tại
-        if (scheduler.checkExists(jobDetail.getKey())) {
-            logger.info("SimpleJob already exists, deleting and rescheduling...");
-            scheduler.deleteJob(jobDetail.getKey());
-        }
-
-        Date scheduledDate = scheduler.scheduleJob(jobDetail, trigger);
-        logger.info("SimpleJob scheduled to run at: {}", scheduledDate);
     }
 
     // Lên lịch một công việc đa cơ sở dữ liệu chạy mỗi phút
@@ -120,19 +92,6 @@ public class JobSchedulerService1 {
             scheduler.scheduleJob(jobDetail, trigger);
         }
     }
-
-
-
-    public void triggerJobNow(String jobName, String groupName) throws SchedulerException {
-        JobKey jobKey = JobKey.jobKey(jobName, groupName);
-        if (scheduler.checkExists(jobKey)) {
-            scheduler.triggerJob(jobKey);
-            logger.info("Job triggered: {}.{}", groupName, jobName);
-        } else {
-            logger.warn("Job not found: {}.{}", groupName, jobName);
-        }
-    }
-
 
     public void pauseJob(String jobName, String groupName) throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(jobName, groupName);

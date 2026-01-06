@@ -11,7 +11,6 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.util.Properties;
 
 @Configuration
 public class QuartzConfig {
@@ -38,19 +37,16 @@ public class QuartzConfig {
         factory.setDataSource(quartzXA);
         factory.setNonTransactionalDataSource(quartzNonXA);
 
-        // QUARTZ PROPERTIES (ONLY org.quartz.*)
+        // Quartz properties
         PropertiesFactoryBean props = new PropertiesFactoryBean();
-        props.setLocation(new ClassPathResource("quartz.properties"));
+        props.setLocation(new ClassPathResource("application.properties"));
         props.afterPropertiesSet();
 
         factory.setQuartzProperties(props.getObject());
 
-        // VERY IMPORTANT
         factory.setOverwriteExistingJobs(true);
         factory.setAutoStartup(true);
 
         return factory;
     }
 }
-
-
